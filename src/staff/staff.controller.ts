@@ -13,6 +13,7 @@ export class StaffController {
     @Get()
     getListStaff(){
       return this.StaffService.getListStaff()
+    
     }
 
     @Post('create')
