@@ -2,19 +2,20 @@
 /* eslint-disable prettier/prettier */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from './users.entity';
+import { User } from './users.entity';
+import { Staff } from 'src/Staff/Staff.entity';
 import { Repository, Connection } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(Users)
-    private readonly user: Repository<Users>,
+    @InjectRepository(User)
+    private readonly user: Repository<User>,
     private connection: Connection,
   ) {}
 
   
-  async findOne(username: string): Promise<Users | undefined> {
+  async findOne(username: string): Promise<User | undefined> {
     return this.user.findOne({ username: username });
   }
 
@@ -22,39 +23,48 @@ export class UserService {
     email: string,
     username: string,
     password: string,
-  ): Promise<Users> {
-    const user = new Users();
-    user.email = email;
-    user.username = username;
-    user.password = password;
-    return await this.user.save(user);
+    staffId: number
+  ): Promise<User> {
+    const staff = await this.connection.manager.findOne(Staff, staffId)
+    console.log({staff});
+    
+    const newUser = new User();
+    newUser.email = email;
+    newUser.username = username;
+    newUser.password = password;
+    newUser.staff = staff
+    return await this.user.save(newUser);
   }
 
-  async findUser(id: number): Promise<Users | undefined> {
-    return this.user.findOne({ id: id });
+  async findUser(id: number): Promise<User | undefined> {
+    return this.user.findOne(id,
+      {
+        relations: ["staff"]
+      }
+      );
   }
-  async findEmail(email: string): Promise<Users | undefined> {
+
+  async findEmail(email: string): Promise<User | undefined> {
     return this.user.findOne({ email: email });
   }
 
-  async findAll(): Promise<Users[]> {
+  async findAll(): Promise<User[]> {
     return await this.user.find();
   }
 
-  async createMany(users: Users) {
+  async createMany(users: User) {
     const queryRunner = this.connection.createQueryRunner();
-
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       console.log(users);
-      await queryRunner.manager.save(Users, users);
+      await queryRunner.manager.save(User, users);
       await queryRunner.commitTransaction();
     } catch (err) {
       // since we have errors lets rollback the changes we made
 
       await queryRunner.rollbackTransaction();
-      return 'error';
+      return err;
     } finally {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();

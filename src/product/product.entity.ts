@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BillDetail } from 'src/bill_detail/bill_detail.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn()
@@ -11,13 +12,17 @@ export class Product {
 
   @Column()
   image: string;
+
+  @Column()
+  type: string;
+
+  @Column()
+  Price: number; 
   
   @Column() 
-  decription: string;
+  Decription: string;
 
-  @Column({unique: true})
-  price: string;
-
-  
-  
+  @OneToMany(()=>BillDetail, (billDetail)=>billDetail.product)
+  billDetail: BillDetail[]
+ 
 }

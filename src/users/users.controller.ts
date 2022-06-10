@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Body, Get, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UserService } from './users.service';
-import { Users } from './users.entity';
+import { User } from './users.entity';
+import { Staff } from 'src/Staff/Staff.entity';
 
 
 
@@ -13,8 +14,8 @@ export class UsersController {
   
   
   @Post('register')
-  create(@Body() user: Users) {
-  return this.UserService.createMany(user);
+  create(@Body() user: User) {
+  return this.UserService.create(user.email, user.username, user.password, user.staff.id);
   }
 
   @Post('change')
@@ -22,5 +23,10 @@ export class UsersController {
     return this.UserService.changePassword(body.id, body.password, body.confirm)
   }
 
+  @Get(':id')
+  async userConversation(@Param() params): Promise<User>{
+    return await this.UserService.findUser(params.id);
+    
+  }
   
 }

@@ -3,13 +3,13 @@ import { Module, RequestMethod, MiddlewareConsumer, NestModule } from '@nestjs/c
 import { UserService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
-import { Users } from './users.entity';
+import { User } from './users.entity';
 import { LoggerMiddleware, RegisterMiddleware } from 'src/logger/logger.middleware';
 
 
 @Module({
 
-  imports: [TypeOrmModule.forFeature([Users])],
+  imports: [TypeOrmModule.forFeature([User])],
   providers: [UserService],
   exports: [UserService],
   controllers: [UsersController],

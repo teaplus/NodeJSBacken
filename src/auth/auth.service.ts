@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { Users } from 'src/users/users.entity';
+import { User } from 'src/users/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +15,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<Users> {
+  async validateUser(username: string, password: string): Promise<User> {
     const user = await this.UserService.findOne(username);
     if (!user) {
       throw new HttpException(
@@ -40,11 +40,12 @@ export class AuthService {
     );
   }
 
-  async sigUp(
+  async signUp(
     email: string,
     username: string,
     password: string,
-  ): Promise<Users> {
+    staffId: number,
+  ): Promise<User> {
     const existEmail = await this.UserService.findEmail(email);
     const existUser = await this.UserService.findOne(username);
     if (existEmail || existUser) {
@@ -56,10 +57,11 @@ export class AuthService {
         HttpStatus.FORBIDDEN,
       );
     } else {
-      const user: Users = await this.UserService.create(
+      const user: User = await this.UserService.create(
         email,
         username,
         password,
+        staffId,
       );
       return user;
     }

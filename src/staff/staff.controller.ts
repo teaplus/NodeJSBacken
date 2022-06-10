@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
 import { Controller, Request, Post, UseGuards, Body, Get } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -13,7 +14,6 @@ export class StaffController {
     @Get()
     getListStaff(){
       return this.StaffService.getListStaff()
-    
     }
 
     @Post('create')
@@ -27,7 +27,7 @@ export class StaffController {
     }
 
     @Post('delete')
-        delete(@Body() id: number){
-            return this.StaffService.deleteStaff(id)
+        delete(@Body() Staff: Staff){
+            return this.StaffService.deleteStaff(Staff.id)
         }
 }

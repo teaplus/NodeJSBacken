@@ -21,16 +21,21 @@ export class StaffService {
       }
 
       async findNumber(number: string): Promise<Staff | undefined> {
-        return this.Staff.findOne({ number: number });
+        console.log('number', number);
+        
+        return this.Staff.findOne({ Pnumber: number });
       }
 
       async findAll(id: number): Promise<Staff | undefined>{
+          console.log('staff', id);
+          
           return this.Staff.findOne({id: id})
       }
       
       async createStaff(Staff: Staff){      
         const existEmail = await this.findEmail(Staff.email)
-        const existNumber = await this.findNumber(Staff.number)
+        const existNumber = await this.findNumber(Staff.Pnumber)
+        // console.log(existNumber)
           if(existEmail||existNumber){
             throw new HttpException(
                 {
@@ -57,14 +62,19 @@ export class StaffService {
 
         async deleteStaff(id: number){
             const existId = await this.findAll(id)
-            console.log(existId)
+            console.log(existId);
+            
             try{
                 if(existId){
-                    await this.Staff.delete(id)
+                   return await this.Staff.delete(id)
                 }
-                return 'id not exist'
+                else{
+                  return 'id not exist'
+
+                }
             }
             catch(e){
+              return e
             }
         }
 

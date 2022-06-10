@@ -1,6 +1,9 @@
 /* eslint-disable prettier/prettier */
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Bill } from 'src/bill/bill.entity';
+import { User } from 'src/users/users.entity';
+import { userInfo } from 'os';
 @Entity()
 export class Staff {
   @PrimaryGeneratedColumn()
@@ -16,8 +19,9 @@ export class Staff {
   birth: Date;
 
   @Column({unique: true})
-  number: string;
+  Pnumber: string;
 
-  
-  
+  @OneToMany(()=>Bill, (bill)=> bill.staff)
+  bill : Bill[]
+
 }
