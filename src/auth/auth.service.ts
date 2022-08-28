@@ -3,10 +3,13 @@ import {
   Injectable,
   HttpException,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/users.entity';
+import { LocalStrategy } from './local.strategy';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -20,45 +23,48 @@ export class AuthService {
     if (!user) {
       throw new HttpException(
         {
-          status: HttpStatus.FORBIDDEN,
+          status: HttpStatus.BAD_REQUEST,
           error: 'Username not exist',
         },
-        HttpStatus.FORBIDDEN,
+        HttpStatus.BAD_REQUEST,
       );
     }
-    const err = '';
-    if (user && user.password === password) {
+    // const err = '';
+    const matches: boolean = await bcrypt.compare(password, user.password);
+    if (matches) {
       const { password, ...result } = user;
+
       return user;
     }
     throw new HttpException(
       {
-        status: HttpStatus.FORBIDDEN,
+        status: HttpStatus.BAD_REQUEST,
         error: 'Password incorrect',
       },
-      HttpStatus.FORBIDDEN,
+      HttpStatus.BAD_REQUEST,
     );
   }
 
+  async createToken(user) {
+    // const payload = {username: user.username}
+  }
+
   async signUp(
-    email: string,
     username: string,
     password: string,
     staffId: number,
   ): Promise<User> {
-    const existEmail = await this.UserService.findEmail(email);
     const existUser = await this.UserService.findOne(username);
-    if (existEmail || existUser) {
+    if (existUser) {
       throw new HttpException(
         {
-          status: HttpStatus.FORBIDDEN,
-          error: 'Emailt/Username đã tồn tại',
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Username đã tồn tại',
         },
-        HttpStatus.FORBIDDEN,
+        HttpStatus.BAD_REQUEST,
       );
     } else {
       const user: User = await this.UserService.create(
-        email,
         username,
         password,
         staffId,
@@ -67,8 +73,22 @@ export class AuthService {
     }
   }
 
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.id, name: user.name };
+  async validate(username: string, password: string): Promise<any> {
+    const user = await this.validateUser(username, password);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
+
+  async login(username: any, password: string) {
+    const staff = await this.validate(username, password);
+    const payload = {
+      username: staff.username,
+      name: staff.staff.name,
+      staffId: staff.staff.id,
+      birth: staff.staff.birth,
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -85,5 +105,11 @@ export class AuthService {
 
   async check(token: any) {
     return this.jwtService.verify(token);
+  }
+
+  async hashPassword(plain: string): Promise<string> {
+    const saltRounds = 10;
+    const hashed: string = await bcrypt.hash(plain, saltRounds);
+    return hashed;
   }
 }

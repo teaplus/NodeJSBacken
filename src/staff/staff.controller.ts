@@ -1,33 +1,52 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Controller, Request, Post, UseGuards, Body, Get } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import {
+  Controller,
+  Request,
+  Post,
+  UseGuards,
+  Body,
+  Get,
+  Response,
+  Header,
+  Delete,
+  Param,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { Staff } from './Staff.entity';
 import { StaffService } from './Staff.service';
 
-
-
-@Controller('Staff')
+@Controller('staff')
 export class StaffController {
-    constructor(private readonly StaffService: StaffService){}
+  constructor(private readonly StaffService: StaffService) {}
+  @Get()
+  getListStaff(@Request() req) {
+    return this.StaffService.getListStaff();
+  }
 
-    @Get()
-    getListStaff(){
-      return this.StaffService.getListStaff()
-    }
+  @Post()
+  createStaff(@Body() Staff: Staff) {
+    return this.StaffService.createStaff(Staff);
+  }
 
-    @Post('create')
-  create(@Body() Staff: Staff) {
-  return this.StaffService.createStaff(Staff);
-    }
+  @Delete()
+  delete(@Body() body) {
+    return this.StaffService.deleteManyStaff(body.id);
+  }
 
-    @Post('edit')
-  edit(@Body() Staff: Staff, id) {
-  return this.StaffService.updateStaff(Staff, id);
-    }
+  @Delete(':id')
+  deleteMany(@Param() params) {
+    return this.StaffService.deleteStaff(params.id);
+  }
 
-    @Post('delete')
-        delete(@Body() Staff: Staff){
-            return this.StaffService.deleteStaff(Staff.id)
-        }
+  @Get(':id')
+  GetEdit(@Param() params) {
+    return this.StaffService.getStaff(params.id);
+  }
+
+  @Put(':id')
+  PutEdit(@Body() body) {
+    return this.StaffService.updateStaff(body, body.id);
+  }
 }

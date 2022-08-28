@@ -14,6 +14,7 @@ import { BillModule } from './bill/bill.module';
 import { Bill } from './bill/bill.entity';
 import { BillDetailModule } from './bill_detail/bill_detail.module';
 import { BillDetail } from './bill_detail/bill_detail.entity';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 const defaultOptions = {
   type: 'mysql',
@@ -35,9 +36,10 @@ const defaultOptions = {
     UsersModule,
     StaffModule,
     Product,
-    // ProductModule,
+    ProductModule,
     BillModule,
     BillDetailModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,102 +1,134 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prettier/prettier */
-import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  BadGatewayException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { error } from 'console';
+import { Bill } from 'src/bill/bill.entity';
 import { Repository, Connection } from 'typeorm';
 import { Staff } from './Staff.entity';
 
 @Injectable()
 export class StaffService {
-    
-    constructor(
-        @InjectRepository(Staff)
-        private readonly Staff: Repository<Staff>,
-        private connection: Connection,
-      ) {}
-    
-      async findEmail(email: string): Promise<Staff | undefined> {
-        return this.Staff.findOne({ email: email });
+  constructor(
+    @InjectRepository(Staff)
+    private readonly Staff: Repository<Staff>,
+    private connection: Connection,
+  ) {}
+
+  async findEmail(email: string): Promise<Staff | undefined> {
+    return this.Staff.findOne({
+      where: {
+        email: email,
+      },
+    });
+  }
+
+  async findNumber(number: string): Promise<Staff | undefined> {
+    return this.Staff.findOne({ where: { phoneNumber: number } });
+  }
+
+  async findAll(id: number): Promise<Staff | undefined> {
+    return this.Staff.findOne({ id: id });
+  }
+
+  async createStaff(Staff: Staff) {
+    const existEmail = await this.findEmail(Staff.email);
+    const existNumber = await this.findNumber(Staff.phoneNumber);
+    if (existEmail || existNumber) {
+      throw new HttpException('Email or phone Number has exist', 403);
+    } else {
+      return await this.Staff.save(Staff);
+    }
+  }
+
+  async updateStaff(staff: Staff, id: number) {
+    const user = this.Staff.findOne({
+      where: {
+        id: id,
+      },
+    });
+    try {
+      if (user) {
+        await this.Staff.update(id, staff);
+        return this.Staff.findOne(id);
       }
+      return new HttpException('user not exist', 404);
+    } catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'bad request',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
-      async findNumber(number: string): Promise<Staff | undefined> {
-        console.log('number', number);
-        
-        return this.Staff.findOne({ Pnumber: number });
+  async deleteManyStaff(id: number[]) {
+    try {
+      for (let i = 0; i < id.length; i++) {
+        await this.Staff.delete(id[i]);
       }
+      return this.Staff.find();
+    } catch (e) {
+      throw new BadGatewayException(e);
+    }
+  }
 
-      async findAll(id: number): Promise<Staff | undefined>{
-          console.log('staff', id);
-          
-          return this.Staff.findOne({id: id})
+  async deleteStaff(id: number) {
+    const existId = await this.findAll(id);
+    console.log(existId);
+    try {
+      if (existId) {
+        await this.Staff.delete(id);
+        return 'delete Success';
       }
-      
-      async createStaff(Staff: Staff){      
-        const existEmail = await this.findEmail(Staff.email)
-        const existNumber = await this.findNumber(Staff.Pnumber)
-        // console.log(existNumber)
-          if(existEmail||existNumber){
-            throw new HttpException(
-                {
-                  status: HttpStatus.FORBIDDEN,
-                  error: 'Email/sdt đã tồn tại',
-                },
-                HttpStatus.FORBIDDEN,
-              );
-          }
-          else{
-          console.log(Staff)
-            return await this.Staff.save(Staff)
-          }
-        }
+      throw new HttpException('user not found', 404);
+    } catch (e) {
+      throw new HttpException('not found', 404);
+    }
+  }
 
-        async updateStaff(Staff: Staff, id: string ){
-            try{
-                await this.Staff.update(Staff.id, Staff)
-            }
-            catch(e){
-                return 'error'
-            }
-        }
+  async getListStaff() {
+    try {
+      const count = await this.Staff.count();
+      const data = await this.Staff.find();
+      return { data, count };
+    } catch (e) {
+      throw { e };
+    }
+  }
 
-        async deleteStaff(id: number){
-            const existId = await this.findAll(id)
-            console.log(existId);
-            
-            try{
-                if(existId){
-                   return await this.Staff.delete(id)
-                }
-                else{
-                  return 'id not exist'
+  async getStaff(id: number) {
+    const staff = await this.Staff.findOne(id);
+    const BillList = await this.connection.manager.find(Bill, {
+      where: {
+        staff: id,
+      },
+    });
+    const billBerStaff = await this.connection.manager.count(Bill, {
+      where: {
+        staff: id,
+      },
+    });
+    try {
+      return { staff, billBerStaff, BillList };
+    } catch (e) {
+      throw new HttpException('notfound', 404);
+    }
+  }
 
-                }
-            }
-            catch(e){
-              return e
-            }
-        }
-
-        async getListStaff(){
-          try{
-            return await this.Staff.find()
-          }
-          catch{}
-        }
-
-        async staffDetail(id: number){
-          try{
-            return await this.Staff.findOne(id)
-          }
-          catch(e){
-            throw new HttpException(
-              {
-                status: HttpStatus.FORBIDDEN,
-                error: "Nhan vien khong ton tai"
-              },
-              HttpStatus.FORBIDDEN
-            )
-          }
-        }
+  async getBill(id: number) {
+    try {
+      return await this.connection.manager.find(Bill, {
+        where: {
+          staff: id,
+        },
+      });
+    } catch (e) {
+      throw new BadGatewayException(e);
+    }
+  }
 }

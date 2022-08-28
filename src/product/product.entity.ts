@@ -6,8 +6,8 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;
-  
-  @Column()
+
+  @Column({ unique: true })
   name: string;
 
   @Column()
@@ -17,12 +17,11 @@ export class Product {
   type: string;
 
   @Column()
-  Price: number; 
-  
-  @Column() 
-  Decription: string;
+  price: number;
 
-  @OneToMany(()=>BillDetail, (billDetail)=>billDetail.product)
-  billDetail: BillDetail[]
- 
+  @Column()
+  decription: string;
+
+  @OneToMany(() => BillDetail, (billDetail) => billDetail.product)
+  billDetail: BillDetail[];
 }

@@ -1,6 +1,14 @@
 /* eslint-disable prettier/prettier */
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Bill } from 'src/bill/bill.entity';
 import { User } from 'src/users/users.entity';
 import { userInfo } from 'os';
@@ -8,20 +16,19 @@ import { userInfo } from 'os';
 export class Staff {
   @PrimaryGeneratedColumn()
   id: number;
-  
-  @Column({unique: true})
+
+  @Column({ unique: true })
   email: string;
 
   @Column()
   name: string;
-  
-  @Column() 
+
+  @Column()
   birth: Date;
 
-  @Column({unique: true})
-  Pnumber: string;
+  @Column({ unique: true })
+  phoneNumber: string;
 
-  @OneToMany(()=>Bill, (bill)=> bill.staff)
-  bill : Bill[]
-
+  @OneToMany(() => Bill, (bill) => bill.staff)
+  bill: Bill[];
 }
