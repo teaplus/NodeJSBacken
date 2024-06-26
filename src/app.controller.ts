@@ -1,27 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prefer-const */
-/* eslint-disable prettier/prettier */
-import {
-  Controller,
-  ParseIntPipe,
-  Request,
-  Post,
-  UseGuards,
-  Get,
-  Render,
-  Redirect,
-  Response,
-  HttpStatus,
-  UnauthorizedException,
-  HttpException,
-  Next,
-  UseInterceptors,
-  Param,
-  Body,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { RedirectError } from './logger/redirecError.middleware';
-import * as express from 'express';
+import { Controller, Request, Post, Response } from '@nestjs/common';
 import { AuthService } from './auth/auth.service';
 
 @Controller()

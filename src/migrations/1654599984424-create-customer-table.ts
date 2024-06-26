@@ -1,11 +1,7 @@
-/* eslint-disable prettier/prettier */
 import {
   MigrationInterface,
   QueryRunner,
   Table,
-  TableIndex,
-  IsNull,
-  TableForeignKeyOptions,
   TableForeignKey,
 } from 'typeorm';
 
